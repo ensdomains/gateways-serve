@@ -14,7 +14,8 @@ type VerifierConfig = {
 let errors = 0;
 
 const test = async (name: string, fn: () => Promise<boolean>) => {
-  process.stdout.write(`${name}`);
+  if (!process.env.CI) process.stdout.write(`${name}`);
+
   let error: unknown;
   await fn()
     .catch((error_) => {
@@ -23,8 +24,10 @@ const test = async (name: string, fn: () => Promise<boolean>) => {
     })
     .then((r) => {
       if (!r) errors++;
-      process.stdout.clearLine(0);
-      process.stdout.cursorTo(0);
+      if (!process.env.CI) {
+        process.stdout.clearLine(0);
+        process.stdout.cursorTo(0);
+      }
       if (error) {
         process.stdout.write("\n");
         console.error(error);
