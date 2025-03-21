@@ -27,7 +27,7 @@ type InputRpcOpts = {
   "rpc.chain1"?: string;
   "rpc.chain2"?: string;
 };
-type RpcOpts = {
+export type RpcOpts = {
   drpcKey: string | undefined;
   infuraKey: string | undefined;
   alchemyKey: string | undefined;
@@ -47,6 +47,7 @@ export const RPC_INFO = new Map<Chain, RPCInfo>(
         ankr: "eth",
         infura: "mainnet",
         alchemy: "eth-mainnet",
+        drpc: "ethereum",
       },
       {
         chain: CHAINS.SEPOLIA,
@@ -115,7 +116,7 @@ export const RPC_INFO = new Map<Chain, RPCInfo>(
         alchemy: "arbnova-mainnet",
       },
       {
-        chain: CHAINS.ARB_SEPOLIA,
+        chain: CHAINS.ARB1_SEPOLIA,
         rpc: "https://sepolia-rollup.arbitrum.io/rpc",
         ankr: "arbitrum_sepolia",
         infura: "arbitrum-sepolia",
@@ -326,12 +327,6 @@ export const RPC_INFO = new Map<Chain, RPCInfo>(
         chain: CHAINS.MORPH,
         rpc: "https://rpc-quicknode-holesky.morphl2.io",
       },
-      // https://docs.soneium.org/docs/builders/overview
-      {
-        chain: CHAINS.SONEIUM_MINATO,
-        rpc: "https://rpc.minato.soneium.org/",
-        alchemy: "soneium-minato",
-      },
     ] satisfies RPCInfo[]
   ).map((x) => [x.chain, x])
 );
@@ -343,7 +338,7 @@ function decideProvider(chain: Chain, rpcOpts: RpcOpts) {
   let apiKey;
 
   if (rpcOpts.customRpc) {
-    console.log(`using custom rpc: ${rpcOpts.customRpc}`);
+    console.log(`Using custom RPC: ${rpcOpts.customRpc}`);
     return {
       info,
       type: "custom",
@@ -352,7 +347,7 @@ function decideProvider(chain: Chain, rpcOpts: RpcOpts) {
   }
 
   if (info.drpc && (apiKey = rpcOpts.drpcKey)) {
-    console.log(`using drpc: ${info.drpc}`);
+    console.log(`Using DRPC: ${info.drpc}`);
     return {
       info,
       type: "drpc",
@@ -365,7 +360,7 @@ function decideProvider(chain: Chain, rpcOpts: RpcOpts) {
     (apiKey = rpcOpts.alchemyKey) &&
     (!info.alchemyPremium || !!rpcOpts.alchemyPremium)
   ) {
-    console.log(`using alchemy: ${info.alchemy}`);
+    console.log(`Using Alchemy: ${info.alchemy}`);
     return {
       info,
       type: "alchemy",
@@ -374,7 +369,7 @@ function decideProvider(chain: Chain, rpcOpts: RpcOpts) {
     };
   }
   if (info.infura && (apiKey = rpcOpts.infuraKey)) {
-    console.log(`using infura: ${info.infura}`);
+    console.log(`Using Infura: ${info.infura}`);
     return {
       info,
       type: "infura",
@@ -383,7 +378,7 @@ function decideProvider(chain: Chain, rpcOpts: RpcOpts) {
     };
   }
   if (info.ankr && (apiKey = rpcOpts.ankrKey)) {
-    console.log(`using ankr: ${info.ankr}`);
+    console.log(`Using Ankr: ${info.ankr}`);
     return {
       info,
       type: "ankr",
@@ -391,6 +386,7 @@ function decideProvider(chain: Chain, rpcOpts: RpcOpts) {
       apiKey,
     };
   }
+  console.log(`Using public RPC: ${info.rpc}`);
   return { info, type: "public", url: info.rpc };
 }
 
@@ -408,21 +404,24 @@ export function createProvider(chain: Chain, opts: RpcOpts): Provider {
   return new GatewayProvider(fr, chain);
 }
 
+export function parseRpcOpts(rpcOpts: InputRpcOpts, pairIndex: 1 | 2): RpcOpts {
+  return {
+    drpcKey: rpcOpts["rpc.drpcKey"],
+    infuraKey: rpcOpts["rpc.infuraKey"],
+    alchemyKey: rpcOpts["rpc.alchemyKey"],
+    alchemyPremium: rpcOpts["rpc.alchemyPremium"],
+    ankrKey: rpcOpts["rpc.ankrKey"],
+    customRpc: rpcOpts[`rpc.chain${pairIndex}`],
+  };
+}
 export function createProviderPair(
   pair: ChainPair,
   rpcOpts: InputRpcOpts
 ): ProviderPair {
   const a = pair.chain1;
   const b = pair.chain2;
-  const opts = {
-    drpcKey: rpcOpts["rpc.drpcKey"],
-    infuraKey: rpcOpts["rpc.infuraKey"],
-    alchemyKey: rpcOpts["rpc.alchemyKey"],
-    alchemyPremium: rpcOpts["rpc.alchemyPremium"],
-    ankrKey: rpcOpts["rpc.ankrKey"],
-  };
   return {
-    provider1: createProvider(a, { ...opts, customRpc: rpcOpts["rpc.chain1"] }),
-    provider2: createProvider(b, { ...opts, customRpc: rpcOpts["rpc.chain2"] }),
+    provider1: createProvider(a, parseRpcOpts(rpcOpts, 1)),
+    provider2: createProvider(b, parseRpcOpts(rpcOpts, 2)),
   };
 }

@@ -1,0 +1,36 @@
+name: Local
+on: [push]
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chain:
+          - "arb1-sepolia"
+          - "arb1"
+          - "base-sepolia"
+          - "base"
+          - "linea-sepolia"
+          - "linea"
+          - "op-sepolia"
+          - "op"
+          - "scroll-sepolia"
+          - "scroll"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Bun 1.2.3
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.3
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Test
+        run: bun gateways-serve ${{ matrix.chain }} & \
+          bun gateways-serve test ${{ matrix.chain }} --gateway-url "https://lb.drpc.org/gateway/unruggable?network=${{ fromJson('{"linea":"linea","linea-sepolia":"linea-sepolia","base":"base","base-sepolia":"base-sepolia","optimism":"op","optimism-sepolia":"op-sepolia","arbitrum":"arb1","arbitrum-sepolia":"arb1-sepolia","scroll":"scroll","scroll-sepolia":"scroll-sepolia"}')[matrix.chain] }}"
+        env:
+          DRPC_KEY: ${{ secrets.DRPC_KEY }}

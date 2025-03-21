@@ -4,7 +4,7 @@
     "": {
       "name": "gateways-serve",
       "dependencies": {
-        "@unruggable/gateways": "^1.0.0",
+        "@unruggable/gateways": "npm:@ensdomains/unruggable-gateways@0.0.0-bold-unfinalized.3",
         "commander": "^13.1.0",
         "ethers": "^6.13.5",
       },
@@ -17,6 +17,9 @@
       },
     },
   },
+  "trustedDependencies": [
+    "@unruggable/gateways",
+  ],
   "packages": {
     "@adraffy/ens-normalize": ["@adraffy/ens-normalize@1.10.1", "", {}, "sha512-96Z2IP3mYmF1Xg2cDm8f1gWGf/HUVedQ3FMifV4kG/PQ4yEP51xDtRAEfhVNt5f/uzpNkZHwWQuUcu6D6K+Ekw=="],
 
@@ -34,7 +37,7 @@
 
     "@types/ws": ["@types/ws@8.5.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw=="],
 
-    "@unruggable/gateways": ["@unruggable/gateways@1.0.0", "", { "dependencies": { "@resolverworks/ezccip": "^0.0.22", "ethers": "^6.13.4" }, "peerDependencies": { "typescript": "^5.5.2" } }, "sha512-Z07Tos1K2slg26H4Tyu3ftc/SB+Alucqby5NflwF6wTz1YOljW6HvFg7FWxeRK3UmrkoDqtBMQn0VMugANIkBg=="],
+    "@unruggable/gateways": ["@ensdomains/unruggable-gateways@0.0.0-bold-unfinalized.3", "", { "dependencies": { "@resolverworks/ezccip": "^0.0.22", "ethers": "^6.13.5" }, "peerDependencies": { "typescript": "^5.5.2" } }, "sha512-lnAYvyoFG+K5LPerrrJvAgZFqpBOySzyBwI9w7O+07EYxxy5EEUN537JT7tyoSA6E+6l+ib7Hairm7EvsC7Ptw=="],
 
     "aes-js": ["aes-js@4.0.0-beta.5", "", {}, "sha512-G965FqalsNyrPqgEGON7nIx1e/OVENSgiEIzyC63haUMuvNnwIgIjMs52hlTCKhkBny7A2ORNlfY9Zu+jmGk1Q=="],
 

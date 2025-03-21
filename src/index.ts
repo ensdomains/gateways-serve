@@ -1,19 +1,20 @@
 import { Command } from "@commander-js/extra-typings";
 import {
+  BoLDRollup,
   Gateway,
   LineaRollup,
-  NitroRollup,
   OPFaultRollup,
   ScrollRollup,
-  type NitroConfig,
+  type ArbitrumConfig,
   type OPFaultConfig,
   type ProviderPair,
   type Rollup,
   type RollupDeployment,
 } from "@unruggable/gateways";
 import { styleText } from "node:util";
-import { createProviderPair } from "./providers";
+import { createProviderPair, parseRpcOpts } from "./providers";
 import { serve } from "./serve";
+import { runSlotDataTests } from "./test";
 
 const program = new Command()
   .name("gateways-serve")
@@ -25,31 +26,36 @@ const program = new Command()
     "--rpc.drpc-key <string>",
     `DRPC API key
 
-    [env: DRPC_KEY=${process.env.DRPC_KEY || ""}]`
+    [env: DRPC_KEY=${process.env.DRPC_KEY || ""}]`,
+    process.env.DRPC_KEY
   )
   .option(
     "--rpc.infura-key <string>",
     `Infura API key
 
-    [env: INFURA_KEY=${process.env.INFURA_KEY || ""}]`
+    [env: INFURA_KEY=${process.env.INFURA_KEY || ""}]`,
+    process.env.INFURA_KEY
   )
   .option(
     "--rpc.alchemy-key <string>",
     `Alchemy API key
 
-    [env: ALCHEMY_KEY=${process.env.ALCHEMY_KEY || ""}]`
+    [env: ALCHEMY_KEY=${process.env.ALCHEMY_KEY || ""}]`,
+    process.env.ALCHEMY_KEY
   )
   .option(
     "--rpc.alchemy-premium",
     `Use alchemy premium API
     
-    [env: ALCHEMY_PREMIUM=${process.env.ALCHEMY_PREMIUM || ""}]`
+    [env: ALCHEMY_PREMIUM=${process.env.ALCHEMY_PREMIUM || ""}]`,
+    !!process.env.ALCHEMY_PREMIUM
   )
   .option(
     "--rpc.ankr-key <string>",
     `Ankr API key
 
-    [env: ANKR_KEY=${process.env.ANKR_KEY || ""}]`
+    [env: ANKR_KEY=${process.env.ANKR_KEY || ""}]`,
+    process.env.ANKR_KEY
   )
   .option("--rpc.chain-1 <string>", "RPC URL override for chain 1")
   .option("--rpc.chain-2 <string>", "RPC URL override for chain 2");
@@ -102,9 +108,9 @@ const createBasicRollup = <rollup extends Rollup, config>(
     serve({ port, config, gateway });
   });
 
-const createNitroRollup = (
+const createBoLDRollup = (
   name: string,
-  baseConfig: RollupDeployment<NitroConfig>
+  baseConfig: RollupDeployment<ArbitrumConfig>
 ) =>
   program
     .command(name)
@@ -112,7 +118,7 @@ const createNitroRollup = (
       "--min-age-blocks <number>",
       "Minimum age of block in blocks (0 for finalized)",
       parseInt,
-      0
+      1800
     )
     .action(function (this) {
       const { port, blockTag, minAgeBlocks, ...rpcOpts } =
@@ -120,7 +126,7 @@ const createNitroRollup = (
       const config = baseConfig;
       const providers = createProviderPair(config, rpcOpts);
 
-      const rollup = new NitroRollup(providers, config, minAgeBlocks);
+      const rollup = new BoLDRollup(providers, config, minAgeBlocks);
       rollup.latestBlockTag = blockTag;
 
       const gateway = new Gateway(rollup);
@@ -138,7 +144,7 @@ const createOpFaultRollup = (
       "--min-age-sec <number>",
       "Minimum age of block in seconds (0 for finalized)",
       parseInt,
-      0
+      21600
     )
     .option("--game-finder <string>", "Game finder contract address")
     .action(function (this) {
@@ -159,8 +165,8 @@ const createOpFaultRollup = (
       serve({ port, config, gateway });
     });
 
-createNitroRollup("arb1", NitroRollup.arb1MainnetConfig);
-createNitroRollup("arb1-sepolia", NitroRollup.arb1SepoliaConfig);
+createBoLDRollup("arb1", BoLDRollup.arb1MainnetConfig);
+createBoLDRollup("arb1-sepolia", BoLDRollup.arb1SepoliaConfig);
 
 createOpFaultRollup("op", OPFaultRollup.mainnetConfig);
 createOpFaultRollup("op-sepolia", OPFaultRollup.sepoliaConfig);
@@ -172,5 +178,18 @@ createBasicRollup("linea-sepolia", LineaRollup, LineaRollup.sepoliaConfig);
 
 createBasicRollup("scroll", ScrollRollup, ScrollRollup.mainnetConfig);
 createBasicRollup("scroll-sepolia", ScrollRollup, ScrollRollup.sepoliaConfig);
+
+program
+  .command("test <chain>")
+  .option("--gateway-url <string>", "Gateway URL", "http://localhost:8000")
+  .action(async function (this) {
+    const chain = this.args[0];
+    const { gatewayUrl, ...rpcOpts } = this.optsWithGlobals();
+    return runSlotDataTests({
+      chainName: chain,
+      gatewayUrl,
+      rpcOpts: parseRpcOpts(rpcOpts, 1),
+    });
+  });
 
 program.parse();
