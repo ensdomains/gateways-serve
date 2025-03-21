@@ -346,15 +346,6 @@ function decideProvider(chain: Chain, rpcOpts: RpcOpts) {
     };
   }
 
-  if (info.drpc && (apiKey = rpcOpts.drpcKey)) {
-    console.log(`Using DRPC: ${info.drpc}`);
-    return {
-      info,
-      type: "drpc",
-      url: `https://lb.drpc.org/ogrpc?network=${info.drpc}&dkey=${apiKey}`,
-      apiKey,
-    };
-  }
   if (
     info.alchemy &&
     (apiKey = rpcOpts.alchemyKey) &&
@@ -374,6 +365,15 @@ function decideProvider(chain: Chain, rpcOpts: RpcOpts) {
       info,
       type: "infura",
       url: `https://${info.infura}.infura.io/v3/${apiKey}`,
+      apiKey,
+    };
+  }
+  if (info.drpc && (apiKey = rpcOpts.drpcKey)) {
+    console.log(`Using DRPC: ${info.drpc}`);
+    return {
+      info,
+      type: "drpc",
+      url: `https://lb.drpc.org/ogrpc?network=${info.drpc}&dkey=${apiKey}`,
       apiKey,
     };
   }
