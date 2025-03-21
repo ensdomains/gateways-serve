@@ -81,8 +81,8 @@ const verifierConfigs = {
   },
   "linea-sepolia": {
     verifier: "0x6AD2BbEE28e780717dF146F59c2213E0EB9CA573",
-    target: "0xA2e3c1b0a43336A21E2fA56928bc7B7848c156A8",
-    pointer: "0xb3664493FB8414d3Dad1275aC0E8a12Ef859694d",
+    target: "0x0d3e01829E8364DeC0e7475ca06B5c73dbA33ef6",
+    pointer: "0x57C2F437E0a5E155ced91a7A17bfc372C0aF7B05",
   },
   linea: {
     verifier: "0x37041498CF4eE07476d2EDeAdcf82d524Aa22ce4",
