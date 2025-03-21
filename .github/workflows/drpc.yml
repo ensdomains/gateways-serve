@@ -30,6 +30,6 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Test
-        run: bun gateways-serve test ${{ matrix.chain }} --gateway-url "https://lb.drpc.org/gateway/unruggable?network=${{ fromJson('{"linea":"linea","linea-sepolia":"linea-sepolia","base":"base","base-sepolia":"base-sepolia","optimism":"op","optimism-sepolia":"op-sepolia","arbitrum":"arb1","arbitrum-sepolia":"arb1-sepolia","scroll":"scroll","scroll-sepolia":"scroll-sepolia"}')[matrix.chain] }}"
+        run: bun gateways-serve test ${{ matrix.chain }} --gateway-url "https://lb.drpc.org/gateway/unruggable?network=${{ fromJson('{"linea":"linea","linea-sepolia":"linea-sepolia","base":"base","base-sepolia":"base-sepolia","op":"optimism","op-sepolia":"optimism-sepolia","arb1":"arbitrum","arb1-sepolia":"arbitrum-sepolia","scroll":"scroll","scroll-sepolia":"scroll-sepolia"}')[matrix.chain] }}"
         env:
           DRPC_KEY: ${{ secrets.DRPC_KEY }}
