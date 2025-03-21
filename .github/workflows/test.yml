@@ -1,8 +1,44 @@
-name: DRPC
+name: Test Gateways
 on: [push]
 jobs:
-  test:
-    name: Test
+  local:
+    name: Local
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        chain:
+          - "arb1-sepolia"
+          - "arb1"
+          - "base-sepolia"
+          - "base"
+          - "linea-sepolia"
+          - "linea"
+          - "op-sepolia"
+          - "op"
+          - "scroll-sepolia"
+          - "scroll"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Bun 1.2.3
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.3
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Test
+        run: bun gateways-serve ${{ matrix.chain }} & bun gateways-serve test ${{ matrix.chain }}
+        env:
+          DRPC_KEY: ${{ secrets.DRPC_KEY }}
+          INFURA_KEY: ${{ (matrix.chain == 'linea-sepolia' || matrix.chain == 'linea') && secrets.INFURA_KEY || '' }}
+
+  drpc:
+    name: DRPC (remote)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
