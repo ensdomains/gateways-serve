@@ -34,3 +34,4 @@ jobs:
         run: bun gateways-serve ${{ matrix.chain }} & bun gateways-serve test ${{ matrix.chain }}
         env:
           DRPC_KEY: ${{ secrets.DRPC_KEY }}
+          INFURA_KEY: ${{ (matrix.chain == 'linea-sepolia' || matrix.chain == 'linea') && secrets.INFURA_KEY || '' }}
