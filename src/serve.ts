@@ -12,13 +12,16 @@ export const serve = <rollup extends Rollup>({
   gateway: Gateway<rollup>;
   config: object;
 }) => {
-  return Bun.serve({
+  const server = Bun.serve({
     port,
     async fetch(req) {
       switch (req.method) {
         case "OPTIONS": {
           return new Response(null, {
-            headers: { ...headers, "access-control-allow-headers": "*" },
+            headers: {
+              ...headers,
+              "access-control-allow-headers": "*",
+            },
           });
         }
         case "GET": {
@@ -26,8 +29,9 @@ export const serve = <rollup extends Rollup>({
           const commits = [commit];
           if (gateway instanceof Gateway) {
             for (const p of await Promise.allSettled(
-              Array.from(gateway.commitCacheMap.cachedKeys(), (i) =>
-                gateway.commitCacheMap.cachedValue(i)
+              Array.from(
+                gateway.commitCacheMap.cachedKeys(),
+                (i) => gateway.commitCacheMap.cachedValue(i)
               )
             )) {
               if (
@@ -83,7 +87,10 @@ export const serve = <rollup extends Rollup>({
           } catch (err) {
             const error = String(err);
             console.log(new Date(), error);
-            return Response.json({ error }, { headers, status: 500 });
+            return Response.json(
+              { error },
+              { headers, status: 500 }
+            );
           }
         }
         default: {
@@ -92,6 +99,9 @@ export const serve = <rollup extends Rollup>({
       }
     },
   });
+  console.log(`Rollup: ${gateway.rollup.constructor.name}`);
+  console.log(`Listening on ${port}`);
+  return server;
 };
 
 function toJSON(x: object) {

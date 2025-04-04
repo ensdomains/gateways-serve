@@ -1,11 +1,12 @@
 import { Command } from "@commander-js/extra-typings";
 import {
   BoLDRollup,
+  EuclidRollup,
   Gateway,
   LineaRollup,
   OPFaultRollup,
-  ScrollRollup,
   type ArbitrumConfig,
+  type EuclidConfig,
   type OPFaultConfig,
   type ProviderPair,
   type Rollup,
@@ -165,6 +166,28 @@ const createOpFaultRollup = (
       serve({ port, config, gateway });
     });
 
+const createScrollRollup = (
+  name: string,
+  baseConfig: RollupDeployment<EuclidConfig>
+) =>
+  program
+    .command(name)
+    .requiredOption("--beacon-url <string>", "Beacon chain RPC URL")
+    .action(function (this) {
+      const { port, blockTag, beaconUrl, ...rpcOpts } =
+        this.optsWithGlobals();
+
+      const config = baseConfig;
+      const providers = createProviderPair(config, rpcOpts);
+
+      const rollup = new EuclidRollup(providers, config, beaconUrl);
+      rollup.latestBlockTag = blockTag;
+
+      const gateway = new Gateway(rollup);
+
+      serve({ port, config, gateway });
+    });
+
 createBoLDRollup("arb1", BoLDRollup.arb1MainnetConfig);
 createBoLDRollup("arb1-sepolia", BoLDRollup.arb1SepoliaConfig);
 
@@ -176,8 +199,8 @@ createOpFaultRollup("base-sepolia", OPFaultRollup.baseSepoliaConfig);
 createBasicRollup("linea", LineaRollup, LineaRollup.mainnetConfig);
 createBasicRollup("linea-sepolia", LineaRollup, LineaRollup.sepoliaConfig);
 
-createBasicRollup("scroll", ScrollRollup, ScrollRollup.mainnetConfig);
-createBasicRollup("scroll-sepolia", ScrollRollup, ScrollRollup.sepoliaConfig);
+//createBasicRollup("scroll", ScrollRollup, ScrollRollup.mainnetConfig);
+createScrollRollup("scroll-sepolia", EuclidRollup.sepoliaConfig);
 
 program
   .command("test <chain>")
