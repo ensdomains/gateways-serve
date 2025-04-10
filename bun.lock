@@ -4,9 +4,9 @@
     "": {
       "name": "gateways-serve",
       "dependencies": {
+        "@unruggable/gateways": "./unruggable-gateways-1.2.0.tgz",
         "commander": "^13.1.0",
         "ethers": "^6.13.5",
-        "@unruggable/gateways": "unruggable-gateways-1.2.0.tgz",
       },
       "devDependencies": {
         "@commander-js/extra-typings": "^13.1.0",
@@ -37,7 +37,7 @@
 
     "@types/ws": ["@types/ws@8.5.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw=="],
 
-    "@unruggable/gateways": ["@unruggable/gateways@unruggable-gateways-1.2.0.tgz", { "dependencies": { "@namestone/ezccip": "^0.1.0", "ethers": "^6.13.5", "fzstd": "^0.1.1" }, "peerDependencies": { "typescript": "^5.5.2" } }],
+    "@unruggable/gateways": ["@unruggable/gateways@./unruggable-gateways-1.2.0.tgz", { "dependencies": { "@namestone/ezccip": "^0.1.0", "ethers": "^6.13.5", "fzstd": "^0.1.1" }, "peerDependencies": { "typescript": "^5.5.2" } }],
 
     "aes-js": ["aes-js@4.0.0-beta.5", "", {}, "sha512-G965FqalsNyrPqgEGON7nIx1e/OVENSgiEIzyC63haUMuvNnwIgIjMs52hlTCKhkBny7A2ORNlfY9Zu+jmGk1Q=="],
 
