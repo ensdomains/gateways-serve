@@ -5,7 +5,7 @@ import {
   type ChainPair,
   type Provider,
   type ProviderPair,
-} from "@unruggable/gateways";
+} from "@ensdomains/unruggable-gateways";
 import { FetchRequest } from "ethers";
 
 export type RPCInfo = {

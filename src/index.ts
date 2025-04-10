@@ -11,7 +11,7 @@ import {
   type ProviderPair,
   type Rollup,
   type RollupDeployment,
-} from "@unruggable/gateways";
+} from "@ensdomains/unruggable-gateways";
 import { styleText } from "node:util";
 import { createProviderPair, parseRpcOpts } from "./providers";
 import { serve } from "./serve";

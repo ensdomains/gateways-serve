@@ -1,4 +1,4 @@
-import { CHAINS } from "@unruggable/gateways";
+import { CHAINS } from "@ensdomains/unruggable-gateways";
 import { Contract } from "ethers";
 import { createProvider, type RpcOpts } from "./providers";
 

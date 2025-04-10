@@ -16,7 +16,7 @@
 		"typescript": "^5.0.0"
 	},
 	"dependencies": {
-		"@unruggable/gateways": "./unruggable-gateways-1.2.0.tgz",
+		"@ensdomains/unruggable-gateways": "0.0.0-scroll-new.0",
 		"commander": "^13.1.0",
 		"ethers": "^6.13.5"
 	},
