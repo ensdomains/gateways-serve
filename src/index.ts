@@ -1,6 +1,7 @@
 import { Command } from "@commander-js/extra-typings";
 import {
   BoLDRollup,
+  ScrollRollup,
   EuclidRollup,
   Gateway,
   LineaRollup,
@@ -199,7 +200,7 @@ createOpFaultRollup("base-sepolia", OPFaultRollup.baseSepoliaConfig);
 createBasicRollup("linea", LineaRollup, LineaRollup.mainnetConfig);
 createBasicRollup("linea-sepolia", LineaRollup, LineaRollup.sepoliaConfig);
 
-//createBasicRollup("scroll", ScrollRollup, ScrollRollup.mainnetConfig);
+createBasicRollup("scroll", ScrollRollup, ScrollRollup.mainnetConfig);
 createScrollRollup("scroll-sepolia", EuclidRollup.sepoliaConfig);
 
 program
