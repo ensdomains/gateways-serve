@@ -1,25 +1,26 @@
 {
-  "name": "gateways-serve",
-  "type": "module",
-  "bin": {
-    "gateways-serve": "./src/index.ts"
-  },
-  "scripts": {
-    "gateways-serve": "bun run src/index.ts"
-  },
-  "devDependencies": {
-    "@commander-js/extra-typings": "^13.1.0",
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@unruggable/gateways": "npm:@ensdomains/unruggable-gateways@0.0.0-bold-unfinalized.3",
-    "commander": "^13.1.0",
-    "ethers": "^6.13.5"
-  },
-  "trustedDependencies": [
-    "@unruggable/gateways"
-  ]
+	"name": "gateways-serve",
+	"type": "module",
+	"version": "0.1.0",
+	"bin": {
+		"gateways-serve": "./src/index.ts"
+	},
+	"scripts": {
+		"gateways-serve": "bun run src/index.ts"
+	},
+	"devDependencies": {
+		"@commander-js/extra-typings": "^13.1.0",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"@ensdomains/unruggable-gateways": "0.0.0-scroll-new.0",
+		"commander": "^13.1.0",
+		"ethers": "^6.13.5"
+	},
+	"trustedDependencies": [
+		"@unruggable/gateways"
+	]
 }
