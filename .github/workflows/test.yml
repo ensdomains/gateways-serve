@@ -31,11 +31,11 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
+      - name: Set env
+        run: ./scripts/set-env.sh ${{ matrix.chain}} ${{ secrets.DRPC_KEY }} ${{ secrets.INFURA_KEY }}
+
       - name: Test
-        run: |
-          ./scripts/set-env.sh ${{ matrix.chain}} ${{ secrets.DRPC_KEY }} ${{ secrets.INFURA_KEY }}
-          cat $GITHUB_ENV
-          bun gateways-serve ${{ matrix.chain }} & bun gateways-serve test ${{ matrix.chain }}
+        run: bun gateways-serve ${{ matrix.chain }} & bun gateways-serve test ${{ matrix.chain }}
 
   drpc:
     name: DRPC (remote)
