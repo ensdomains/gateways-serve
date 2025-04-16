@@ -1,11 +1,11 @@
 import { Command } from "@commander-js/extra-typings";
 import {
   BoLDRollup,
-  ScrollRollup,
   EuclidRollup,
   Gateway,
   LineaRollup,
   OPFaultRollup,
+  ScrollRollup,
   type ArbitrumConfig,
   type EuclidConfig,
   type OPFaultConfig,
@@ -173,10 +173,15 @@ const createScrollRollup = (
 ) =>
   program
     .command(name)
-    .requiredOption("--beacon-url <string>", "Beacon chain RPC URL")
+    .requiredOption(
+      "--beacon-url <string>",
+      `Beacon chain RPC URL
+
+    [env: BEACON_URL=${process.env.BEACON_URL || ""}]`,
+      process.env.BEACON_URL
+    )
     .action(function (this) {
-      const { port, blockTag, beaconUrl, ...rpcOpts } =
-        this.optsWithGlobals();
+      const { port, blockTag, beaconUrl, ...rpcOpts } = this.optsWithGlobals();
 
       const config = baseConfig;
       const providers = createProviderPair(config, rpcOpts);

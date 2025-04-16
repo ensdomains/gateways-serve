@@ -32,10 +32,9 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Test
-        run: bun gateways-serve ${{ matrix.chain }} & bun gateways-serve test ${{ matrix.chain }}
-        env:
-          DRPC_KEY: ${{ secrets.DRPC_KEY }}
-          INFURA_KEY: ${{ (matrix.chain == 'linea-sepolia' || matrix.chain == 'linea') && secrets.INFURA_KEY || '' }}
+        run: |
+          ./scripts/set-env.sh ${{ matrix.chain}} ${{ secrets.DRPC_KEY }} ${{ secrets.INFURA_KEY }}
+          bun gateways-serve ${{ matrix.chain }} & bun gateways-serve test ${{ matrix.chain }}
 
   drpc:
     name: DRPC (remote)
