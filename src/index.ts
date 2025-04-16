@@ -79,6 +79,11 @@ program.configureHelp({
     )} ${args}`;
   },
   styleOptionDescription: (str) => {
+    if (str.includes("[env: "))
+      str = str.replace(
+        /\[env: (.*)=(.*)?\] \(default: "?\2"?\)$/,
+        (_, key, value) => `[env: ${key}=${value}]`
+      );
     const isHelp = str.includes("display help");
     const lines = ["", ...str.split("\n")]
       .map((l) => `          ${l.trim()}`)
