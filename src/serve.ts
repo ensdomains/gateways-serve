@@ -44,7 +44,7 @@ export const serve = <rollup extends Rollup>({
             }
           }
           return Response.json({
-            ...config,
+            ...toJSON(config),
             prover: toJSON({
               ...commit.prover,
               block: undefined,
