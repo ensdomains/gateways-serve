@@ -131,17 +131,16 @@ function serveGateway<R extends Rollup>(
   rollup.latestBlockTag = opts.blockTag;
   rollup.getLogsStepSize = opts.logStepSize;
   rollup.configure = (commit: RollupCommitType<R>) => {
-    commit.prover.fast = !!opts.fast;
+    commit.prover.fast = opts.fast;
     commit.prover.printDebug = false;
   };
   const gateway = new Gateway(rollup);
-  const freqMs = opts.frequency * 1000;
   if (opts.cache) {
     gateway.callLRU.max = opts.maxCallCache;
     gateway.commitDepth = opts.commitDepth;
     gateway.latestCache.cacheMs = Math.max(
       gateway.latestCache.cacheMs,
-      freqMs
+      opts.frequency * 1000
     );
   } else {
     gateway.disableCache();
@@ -161,7 +160,7 @@ function serveGateway<R extends Rollup>(
       chain1: chainName(rollup.provider1._network.chainId),
       chain2: chainName(rollup.provider2._network.chainId),
       since: new Date(),
-      prefetchMs: freqMs,
+      prefetch: opts.prefetch,
       ...gateway,
       ...rollup,
       beaconAPI: undefined, // hide
