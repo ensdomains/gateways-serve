@@ -1,4 +1,8 @@
-import { Gateway, toUnpaddedHex, type Rollup } from "@ensdomains/unruggable-gateways";
+import {
+  Gateway,
+  toUnpaddedHex,
+  type Rollup,
+} from "@ensdomains/unruggable-gateways";
 import { Contract } from "ethers/contract";
 
 const headers = { "access-control-allow-origin": "*" }; // TODO: cli-option to disable cors?

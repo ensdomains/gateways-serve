@@ -22,7 +22,8 @@ import { runSlotDataTests } from "./test";
 
 function parseUint(s: string): number {
   const i = parseInt(s);
-  if (!Number.isSafeInteger(i) || i < 0) throw new Error(`expected unsigned integer: ${s}`);
+  if (!Number.isSafeInteger(i) || i < 0)
+    throw new Error(`expected unsigned integer: ${s}`);
   return i;
 }
 
@@ -32,12 +33,33 @@ const program = new Command()
   .version("1.0.0")
   .option("-p, --port <number>", "Port to listen on", parseUint, 8000)
   .option("-t, --block-tag <string>", "Block tag to use", "finalized")
-  .option("--prefetch <number>", "Prefetch Frequency in seconds (0 to disable)", parseUint, 60)
-  .option("--log-step-size <number>", "eth_getLogs Chunk Size", parseUint, 10000)
-  .option("--disable-cache", "Disable Cache")
-  .option("--disable-fast", "Always use eth_getProof instead of getStorageAt")
-  .option("--max-call-cache <number>", "Number of calls to cache per commit", parseUint, 10000)
-  .option("--commit-depth <number>", "Number of older commits to keep", parseUint, 2)
+  .option(
+    "-f, --frequency <number>",
+    "Frequency in seconds to check for commits",
+    parseUint,
+    0
+  )
+  .option("--no-prefetch", "Disable Commit Prefetch")
+  .option(
+    "--log-step-size <number>",
+    "eth_getLogs Chunk Size",
+    parseUint,
+    10000
+  )
+  .option("--no-cache", "Disable Cache")
+  .option("--no-fast", "Always use eth_getProof instead of eth_getStorageAt")
+  .option(
+    "--max-call-cache <number>",
+    "Number of calls to cache per commit",
+    parseUint,
+    10000
+  )
+  .option(
+    "--commit-depth <number>",
+    "Number of older commits to keep",
+    parseUint,
+    2
+  )
   .option(
     "--rpc.drpc-key <string>",
     `DRPC API key
@@ -102,32 +124,33 @@ program.configureHelp({
   showGlobalOptions: true,
 });
 
-function serveGateway<R extends Rollup>(rollup: R, opts: ReturnType<typeof program.optsWithGlobals>) {
+function serveGateway<R extends Rollup>(
+  rollup: R,
+  opts: ReturnType<typeof program.optsWithGlobals>
+) {
   rollup.latestBlockTag = opts.blockTag;
   rollup.getLogsStepSize = opts.logStepSize;
   rollup.configure = (commit: RollupCommitType<R>) => {
-    commit.prover.fast = !opts.disableFast;
+    commit.prover.fast = !!opts.fast;
     commit.prover.printDebug = false;
-  }
+  };
   const gateway = new Gateway(rollup);
-  if (opts.disableCache) {
-    gateway.disableCache();
-  } else {
+  const freqMs = opts.frequency * 1000;
+  if (opts.cache) {
     gateway.callLRU.max = opts.maxCallCache;
     gateway.commitDepth = opts.commitDepth;
+    gateway.latestCache.cacheMs = Math.max(
+      gateway.latestCache.cacheMs,
+      freqMs
+    );
+  } else {
+    gateway.disableCache();
   }
-  const prefetchMs = opts.prefetch * 1000;
-  if (prefetchMs > 0) {
+  if (opts.prefetch) {
     prefetch();
     async function prefetch() {
-      for (let retry = 3; retry; retry--) {
-        try {
-          await gateway.getLatestCommit();
-          break;
-        } catch (err) {
-        }
-      }
-      setTimeout(prefetch, prefetchMs);
+      await gateway.getLatestCommit().catch(() => {});
+      setTimeout(prefetch, gateway.latestCache.cacheMs);
     }
   }
   serve({
@@ -138,10 +161,10 @@ function serveGateway<R extends Rollup>(rollup: R, opts: ReturnType<typeof progr
       chain1: chainName(rollup.provider1._network.chainId),
       chain2: chainName(rollup.provider2._network.chainId),
       since: new Date(),
-      prefetchMs,
+      prefetchMs: freqMs,
       ...gateway,
       ...rollup,
-      beaconAPI: undefined // hide
+      beaconAPI: undefined, // hide
     },
   });
 }
@@ -158,7 +181,7 @@ const createBasicRollup = <rollup extends Rollup, config>(
     const opts = this.optsWithGlobals();
     const providers = createProviderPair(baseConfig, opts);
     const rollup = new RollupClass(providers, baseConfig);
-    serveGateway(rollup, opts)
+    serveGateway(rollup, opts);
   });
 
 const createBoLDRollup = (
@@ -176,7 +199,11 @@ const createBoLDRollup = (
     .action(function (this) {
       const opts = this.optsWithGlobals();
       const providers = createProviderPair(baseConfig, opts);
-      const rollup = new BoLDRollup(providers, baseConfig, opts.minAgeBlocks);
+      const rollup = new BoLDRollup(
+        providers,
+        baseConfig,
+        opts.minAgeBlocks
+      );
       serveGateway(rollup, opts);
     });
 
@@ -201,7 +228,7 @@ const createOpFaultRollup = (
       } satisfies RollupDeployment<OPFaultConfig>;
       const providers = createProviderPair(config, opts);
       const rollup = new OPFaultRollup(providers, config, opts.minAgeSec);
-      serveGateway(rollup, opts)
+      serveGateway(rollup, opts);
     });
 
 const createScrollRollup = (
@@ -214,8 +241,12 @@ const createScrollRollup = (
     .action(function (this) {
       const opts = this.optsWithGlobals();
       const providers = createProviderPair(baseConfig, opts);
-      const rollup = new EuclidRollup(providers, baseConfig, opts.beaconUrl);
-      serveGateway(rollup, opts)
+      const rollup = new EuclidRollup(
+        providers,
+        baseConfig,
+        opts.beaconUrl
+      );
+      serveGateway(rollup, opts);
     });
 
 createBoLDRollup("arb1", BoLDRollup.arb1MainnetConfig);
