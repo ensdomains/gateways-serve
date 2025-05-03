@@ -12,18 +12,32 @@ import {
   type ProviderPair,
   type Rollup,
   type RollupDeployment,
+  type RollupCommitType,
+  chainName,
 } from "@ensdomains/unruggable-gateways";
 import { styleText } from "node:util";
 import { createProviderPair, parseRpcOpts } from "./providers";
 import { serve } from "./serve";
 import { runSlotDataTests } from "./test";
 
+function parseUint(s: string): number {
+  const i = parseInt(s);
+  if (!Number.isSafeInteger(i) || i < 0) throw new Error(`expected unsigned integer: ${s}`);
+  return i;
+}
+
 const program = new Command()
   .name("gateways-serve")
   .description("A CLI tool to serve gateways")
   .version("1.0.0")
-  .option("-p, --port <number>", "Port to listen on", parseInt, 8000)
+  .option("-p, --port <number>", "Port to listen on", parseUint, 8000)
   .option("-t, --block-tag <string>", "Block tag to use", "finalized")
+  .option("--prefetch <number>", "Prefetch Frequency in seconds (0 to disable)", parseUint, 60)
+  .option("--log-step-size <number>", "eth_getLogs Chunk Size", parseUint, 10000)
+  .option("--disable-cache", "Disable Cache")
+  .option("--disable-fast", "Always use eth_getProof instead of getStorageAt")
+  .option("--max-call-cache <number>", "Number of calls to cache per commit", parseUint, 10000)
+  .option("--commit-depth <number>", "Number of older commits to keep", parseUint, 2)
   .option(
     "--rpc.drpc-key <string>",
     `DRPC API key
@@ -88,6 +102,50 @@ program.configureHelp({
   showGlobalOptions: true,
 });
 
+function serveGateway<R extends Rollup>(rollup: R, opts: ReturnType<typeof program.optsWithGlobals>) {
+  rollup.latestBlockTag = opts.blockTag;
+  rollup.getLogsStepSize = opts.logStepSize;
+  rollup.configure = (commit: RollupCommitType<R>) => {
+    commit.prover.fast = !opts.disableFast;
+    commit.prover.printDebug = false;
+  }
+  const gateway = new Gateway(rollup);
+  if (opts.disableCache) {
+    gateway.disableCache();
+  } else {
+    gateway.callLRU.max = opts.maxCallCache;
+    gateway.commitDepth = opts.commitDepth;
+  }
+  const prefetchMs = opts.prefetch * 1000;
+  if (prefetchMs > 0) {
+    prefetch();
+    async function prefetch() {
+      for (let retry = 3; retry; retry--) {
+        try {
+          await gateway.getLatestCommit();
+          break;
+        } catch (err) {
+        }
+      }
+      setTimeout(prefetch, prefetchMs);
+    }
+  }
+  serve({
+    port: opts.port,
+    gateway,
+    config: {
+      name: rollup.constructor.name,
+      chain1: chainName(rollup.provider1._network.chainId),
+      chain2: chainName(rollup.provider2._network.chainId),
+      since: new Date(),
+      prefetchMs,
+      ...gateway,
+      ...rollup,
+      beaconAPI: undefined // hide
+    },
+  });
+}
+
 const createBasicRollup = <rollup extends Rollup, config>(
   name: string,
   RollupClass: new (
@@ -97,17 +155,10 @@ const createBasicRollup = <rollup extends Rollup, config>(
   baseConfig: RollupDeployment<config>
 ) =>
   program.command(name).action(function (this) {
-    const { port, blockTag, ...rpcOpts } = this.optsWithGlobals();
-
-    const config = baseConfig;
-    const providers = createProviderPair(config, rpcOpts);
-
-    const rollup = new RollupClass(providers, config);
-    rollup.latestBlockTag = blockTag;
-
-    const gateway = new Gateway(rollup);
-
-    serve({ port, config, gateway });
+    const opts = this.optsWithGlobals();
+    const providers = createProviderPair(baseConfig, opts);
+    const rollup = new RollupClass(providers, baseConfig);
+    serveGateway(rollup, opts)
   });
 
 const createBoLDRollup = (
@@ -123,17 +174,10 @@ const createBoLDRollup = (
       1800
     )
     .action(function (this) {
-      const { port, blockTag, minAgeBlocks, ...rpcOpts } =
-        this.optsWithGlobals();
-      const config = baseConfig;
-      const providers = createProviderPair(config, rpcOpts);
-
-      const rollup = new BoLDRollup(providers, config, minAgeBlocks);
-      rollup.latestBlockTag = blockTag;
-
-      const gateway = new Gateway(rollup);
-
-      serve({ port, config, gateway });
+      const opts = this.optsWithGlobals();
+      const providers = createProviderPair(baseConfig, opts);
+      const rollup = new BoLDRollup(providers, baseConfig, opts.minAgeBlocks);
+      serveGateway(rollup, opts);
     });
 
 const createOpFaultRollup = (
@@ -150,21 +194,14 @@ const createOpFaultRollup = (
     )
     .option("--game-finder <string>", "Game finder contract address")
     .action(function (this) {
-      const { port, blockTag, minAgeSec, gameFinder, ...rpcOpts } =
-        this.optsWithGlobals();
+      const opts = this.optsWithGlobals();
       const config = {
         ...baseConfig,
-        GameFinder: gameFinder ?? baseConfig.GameFinder,
+        GameFinder: opts.gameFinder ?? baseConfig.GameFinder,
       } satisfies RollupDeployment<OPFaultConfig>;
-
-      const providers = createProviderPair(config, rpcOpts);
-
-      const rollup = new OPFaultRollup(providers, config, minAgeSec);
-      rollup.latestBlockTag = blockTag;
-
-      const gateway = new Gateway(rollup);
-
-      serve({ port, config, gateway });
+      const providers = createProviderPair(config, opts);
+      const rollup = new OPFaultRollup(providers, config, opts.minAgeSec);
+      serveGateway(rollup, opts)
     });
 
 const createScrollRollup = (
@@ -175,18 +212,10 @@ const createScrollRollup = (
     .command(name)
     .requiredOption("--beacon-url <string>", "Beacon chain RPC URL")
     .action(function (this) {
-      const { port, blockTag, beaconUrl, ...rpcOpts } =
-        this.optsWithGlobals();
-
-      const config = baseConfig;
-      const providers = createProviderPair(config, rpcOpts);
-
-      const rollup = new EuclidRollup(providers, config, beaconUrl);
-      rollup.latestBlockTag = blockTag;
-
-      const gateway = new Gateway(rollup);
-
-      serve({ port, config, gateway });
+      const opts = this.optsWithGlobals();
+      const providers = createProviderPair(baseConfig, opts);
+      const rollup = new EuclidRollup(providers, baseConfig, opts.beaconUrl);
+      serveGateway(rollup, opts)
     });
 
 createBoLDRollup("arb1", BoLDRollup.arb1MainnetConfig);

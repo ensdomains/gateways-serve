@@ -12,6 +12,7 @@ export const serve = <rollup extends Rollup>({
   gateway: Gateway<rollup>;
   config: object;
 }) => {
+  config = toJSON(config);
   const server = Bun.serve({
     port,
     async fetch(req) {
@@ -44,11 +45,11 @@ export const serve = <rollup extends Rollup>({
             }
           }
           return Response.json({
-            ...toJSON(config),
+            ...config,
             prover: toJSON({
               ...commit.prover,
-              block: undefined,
-              batchIndex: undefined,
+              block: undefined, // hide
+              batchIndex: undefined, // hide
               cache: {
                 fetches: commit.prover.cache.maxCached,
                 proofs: commit.prover.proofLRU.max,
@@ -58,12 +59,6 @@ export const serve = <rollup extends Rollup>({
               ...toJSON(c),
               fetches: c.prover.cache.cachedSize,
               proofs: c.prover.proofLRU.size,
-              // cache: Object.fromEntries(
-              //   Array.from(c.prover.proofMap(), ([k, v]) => [
-              //     k,
-              //     v.map(bigintToJSON),
-              //   ])
-              // ),
             })),
           });
         }
