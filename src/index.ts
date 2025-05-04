@@ -142,15 +142,15 @@ function serveGateway<R extends Rollup>(
       gateway.latestCache.cacheMs,
       opts.frequency * 1000
     );
+    if (opts.prefetch) {
+      prefetch();
+      async function prefetch() {
+        await gateway.getLatestCommit().catch(() => {});
+        setTimeout(prefetch, gateway.latestCache.cacheMs);
+      }
+    }
   } else {
     gateway.disableCache();
-  }
-  if (opts.prefetch) {
-    prefetch();
-    async function prefetch() {
-      await gateway.getLatestCommit().catch(() => {});
-      setTimeout(prefetch, gateway.latestCache.cacheMs);
-    }
   }
   serve({
     port: opts.port,
@@ -160,7 +160,7 @@ function serveGateway<R extends Rollup>(
       chain1: chainName(rollup.provider1._network.chainId),
       chain2: chainName(rollup.provider2._network.chainId),
       since: new Date(),
-      prefetch: opts.prefetch,
+      prefetch: opts.cache && opts.prefetch,
       ...gateway,
       ...rollup,
       beaconAPI: undefined, // hide
