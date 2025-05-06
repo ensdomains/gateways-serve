@@ -1,11 +1,11 @@
 import { Command } from "@commander-js/extra-typings";
 import {
   BoLDRollup,
-  ScrollRollup,
   EuclidRollup,
   Gateway,
   LineaRollup,
   OPFaultRollup,
+  ScrollRollup,
   type ArbitrumConfig,
   type EuclidConfig,
   type OPFaultConfig,
@@ -79,6 +79,11 @@ program.configureHelp({
     )} ${args}`;
   },
   styleOptionDescription: (str) => {
+    if (str.includes("[env: "))
+      str = str.replace(
+        /\[env: (.*)=(.*)?\] \(default: "?\2"?\)$/,
+        (_, key, value) => `[env: ${key}=${value}]`
+      );
     const isHelp = str.includes("display help");
     const lines = ["", ...str.split("\n")]
       .map((l) => `          ${l.trim()}`)
@@ -173,10 +178,15 @@ const createScrollRollup = (
 ) =>
   program
     .command(name)
-    .requiredOption("--beacon-url <string>", "Beacon chain RPC URL")
+    .requiredOption(
+      "--beacon-url <string>",
+      `Beacon chain RPC URL
+
+    [env: BEACON_URL=${process.env.BEACON_URL || ""}]`,
+      process.env.BEACON_URL
+    )
     .action(function (this) {
-      const { port, blockTag, beaconUrl, ...rpcOpts } =
-        this.optsWithGlobals();
+      const { port, blockTag, beaconUrl, ...rpcOpts } = this.optsWithGlobals();
 
       const config = baseConfig;
       const providers = createProviderPair(config, rpcOpts);

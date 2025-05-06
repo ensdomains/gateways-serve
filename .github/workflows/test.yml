@@ -31,11 +31,11 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
+      - name: Set env
+        run: ./scripts/set-env.sh ${{ matrix.chain}} ${{ secrets.DRPC_KEY }} ${{ secrets.INFURA_KEY }}
+
       - name: Test
         run: bun gateways-serve ${{ matrix.chain }} & bun gateways-serve test ${{ matrix.chain }}
-        env:
-          DRPC_KEY: ${{ secrets.DRPC_KEY }}
-          INFURA_KEY: ${{ (matrix.chain == 'linea-sepolia' || matrix.chain == 'linea') && secrets.INFURA_KEY || '' }}
 
   drpc:
     name: DRPC (remote)
@@ -69,5 +69,40 @@ jobs:
 
       - name: Test
         run: bun gateways-serve test ${{ matrix.chain }} --gateway-url "https://lb.drpc.org/gateway/unruggable?network=${{ fromJson('{"linea":"linea","linea-sepolia":"linea-sepolia","base":"base","base-sepolia":"base-sepolia","op":"optimism","op-sepolia":"optimism-sepolia","arb1":"arbitrum","arb1-sepolia":"arbitrum-sepolia","scroll":"scroll","scroll-sepolia":"scroll-sepolia"}')[matrix.chain] }}"
+        env:
+          DRPC_KEY: ${{ secrets.DRPC_KEY }}
+
+  worker:
+    name: Worker (remote)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        chain:
+          - "arb1-sepolia"
+          - "arb1"
+          - "base-sepolia"
+          - "base"
+          - "linea-sepolia"
+          - "linea"
+          - "op-sepolia"
+          - "op"
+          - "scroll-sepolia"
+          - "scroll"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Bun 1.2.3
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.3
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Test
+        run: bun gateways-serve test ${{ matrix.chain }} --gateway-url "https://gateways-worker-${{ matrix.chain }}.ens-cf.workers.dev"
         env:
           DRPC_KEY: ${{ secrets.DRPC_KEY }}

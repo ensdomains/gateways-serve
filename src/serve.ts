@@ -1,4 +1,8 @@
-import { Gateway, toUnpaddedHex, type Rollup } from "@ensdomains/unruggable-gateways";
+import {
+  Gateway,
+  toUnpaddedHex,
+  type Rollup,
+} from "@ensdomains/unruggable-gateways";
 import { Contract } from "ethers/contract";
 
 const headers = { "access-control-allow-origin": "*" }; // TODO: cli-option to disable cors?
@@ -29,9 +33,8 @@ export const serve = <rollup extends Rollup>({
           const commits = [commit];
           if (gateway instanceof Gateway) {
             for (const p of await Promise.allSettled(
-              Array.from(
-                gateway.commitCacheMap.cachedKeys(),
-                (i) => gateway.commitCacheMap.cachedValue(i)
+              Array.from(gateway.commitCacheMap.cachedKeys(), (i) =>
+                gateway.commitCacheMap.cachedValue(i)
               )
             )) {
               if (
@@ -58,12 +61,6 @@ export const serve = <rollup extends Rollup>({
               ...toJSON(c),
               fetches: c.prover.cache.cachedSize,
               proofs: c.prover.proofLRU.size,
-              // cache: Object.fromEntries(
-              //   Array.from(c.prover.proofMap(), ([k, v]) => [
-              //     k,
-              //     v.map(bigintToJSON),
-              //   ])
-              // ),
             })),
           });
         }
@@ -85,12 +82,14 @@ export const serve = <rollup extends Rollup>({
             );
             return Response.json({ data }, { headers });
           } catch (err) {
-            const error = String(err);
+            // flatten nested errors
+            const errors = [String(err)];
+            for (let e = err; e instanceof Error && e.cause; e = e.cause) {
+              errors.push(String(e.cause));
+            }
+            const error = errors.join(" <== ");
             console.log(new Date(), error);
-            return Response.json(
-              { error },
-              { headers, status: 500 }
-            );
+            return Response.json({ error }, { headers, status: 500 });
           }
         }
         default: {
