@@ -26,6 +26,7 @@ type InputRpcOpts = {
   "rpc.ankrKey"?: string;
   "rpc.chain1"?: string;
   "rpc.chain2"?: string;
+  timeout: number;
 };
 export type RpcOpts = {
   drpcKey: string | undefined;
@@ -34,6 +35,7 @@ export type RpcOpts = {
   alchemyPremium: boolean | undefined;
   ankrKey: string | undefined;
   customRpc: string | undefined;
+  timeout: number;
 };
 
 // TODO: this list is incomplete!
@@ -328,7 +330,7 @@ export const RPC_INFO = new Map<Chain, RPCInfo>(
         rpc: "https://rpc-quicknode-holesky.morphl2.io",
       },
     ] satisfies RPCInfo[]
-  ).map((x) => [x.chain, x])
+  ).map((x) => [x.chain, x]),
 );
 
 function decideProvider(chain: Chain, rpcOpts: RpcOpts) {
@@ -396,11 +398,7 @@ export function providerURL(chain: Chain, opts: RpcOpts): string {
 
 export function createProvider(chain: Chain, opts: RpcOpts): Provider {
   const fr = new FetchRequest(providerURL(chain, opts));
-  fr.timeout = 5000; // 5 minutes is too long
-  // fr.preflightFunc = async (req) => {
-  //   console.log(req.url);
-  //   return req;
-  // };
+  fr.timeout = opts.timeout;
   return new GatewayProvider(fr, chain);
 }
 
@@ -412,11 +410,12 @@ export function parseRpcOpts(rpcOpts: InputRpcOpts, pairIndex: 1 | 2): RpcOpts {
     alchemyPremium: rpcOpts["rpc.alchemyPremium"],
     ankrKey: rpcOpts["rpc.ankrKey"],
     customRpc: rpcOpts[`rpc.chain${pairIndex}`],
+	timeout: rpcOpts.timeout
   };
 }
 export function createProviderPair(
   pair: ChainPair,
-  rpcOpts: InputRpcOpts
+  rpcOpts: InputRpcOpts,
 ): ProviderPair {
   const a = pair.chain1;
   const b = pair.chain2;

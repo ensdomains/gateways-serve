@@ -4,6 +4,7 @@ import {
   type Rollup,
 } from "@ensdomains/unruggable-gateways";
 import { Contract } from "ethers/contract";
+import { flattenErrors } from "./utils";
 
 const headers = { "access-control-allow-origin": "*" }; // TODO: cli-option to disable cors?
 
@@ -16,6 +17,7 @@ export const serve = <rollup extends Rollup>({
   gateway: Gateway<rollup>;
   config: object;
 }) => {
+  config = toJSON(config);
   const server = Bun.serve({
     port,
     async fetch(req) {
@@ -34,8 +36,8 @@ export const serve = <rollup extends Rollup>({
           if (gateway instanceof Gateway) {
             for (const p of await Promise.allSettled(
               Array.from(gateway.commitCacheMap.cachedKeys(), (i) =>
-                gateway.commitCacheMap.cachedValue(i)
-              )
+                gateway.commitCacheMap.cachedValue(i),
+              ),
             )) {
               if (
                 p.status === "fulfilled" &&
@@ -47,11 +49,11 @@ export const serve = <rollup extends Rollup>({
             }
           }
           return Response.json({
-            ...toJSON(config),
+            ...config,
             prover: toJSON({
               ...commit.prover,
-              block: undefined,
-              batchIndex: undefined,
+              block: undefined, // hide
+              batchIndex: undefined, // hide
               cache: {
                 fetches: commit.prover.cache.maxCached,
                 proofs: commit.prover.proofLRU.max,
@@ -73,21 +75,16 @@ export const serve = <rollup extends Rollup>({
               calldata,
               {
                 protocol: "raw",
-              }
+              },
             );
             console.log(
               new Date(),
               history.toString(),
-              Math.round(performance.now() - t0)
+              Math.round(performance.now() - t0),
             );
             return Response.json({ data }, { headers });
           } catch (err) {
-            // flatten nested errors
-            const errors = [String(err)];
-            for (let e = err; e instanceof Error && e.cause; e = e.cause) {
-              errors.push(String(e.cause));
-            }
-            const error = errors.join(" <== ");
+            const error = flattenErrors(err);
             console.log(new Date(), error);
             return Response.json({ error }, { headers, status: 500 });
           }
