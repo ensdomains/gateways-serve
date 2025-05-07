@@ -4,6 +4,7 @@ import {
   type Rollup,
 } from "@ensdomains/unruggable-gateways";
 import { Contract } from "ethers/contract";
+import { flattenErrors } from "./utils";
 
 const headers = { "access-control-allow-origin": "*" }; // TODO: cli-option to disable cors?
 
@@ -34,10 +35,9 @@ export const serve = <rollup extends Rollup>({
           const commits = [commit];
           if (gateway instanceof Gateway) {
             for (const p of await Promise.allSettled(
-              Array.from(
-                gateway.commitCacheMap.cachedKeys(),
-                (i) => gateway.commitCacheMap.cachedValue(i)
-              )
+              Array.from(gateway.commitCacheMap.cachedKeys(), (i) =>
+                gateway.commitCacheMap.cachedValue(i),
+              ),
             )) {
               if (
                 p.status === "fulfilled" &&
@@ -75,21 +75,18 @@ export const serve = <rollup extends Rollup>({
               calldata,
               {
                 protocol: "raw",
-              }
+              },
             );
             console.log(
               new Date(),
               history.toString(),
-              Math.round(performance.now() - t0)
+              Math.round(performance.now() - t0),
             );
             return Response.json({ data }, { headers });
           } catch (err) {
-            const error = String(err);
+            const error = flattenErrors(err);
             console.log(new Date(), error);
-            return Response.json(
-              { error },
-              { headers, status: 500 }
-            );
+            return Response.json({ error }, { headers, status: 500 });
           }
         }
         default: {
