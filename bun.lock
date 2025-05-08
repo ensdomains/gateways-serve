@@ -4,7 +4,7 @@
     "": {
       "name": "gateways-serve",
       "dependencies": {
-        "@ensdomains/unruggable-gateways": "^0.0.1",
+        "@ensdomains/unruggable-gateways": "^0.0.2",
         "commander": "^13.1.0",
         "ethers": "^6.13.5",
       },
@@ -22,7 +22,7 @@
 
     "@commander-js/extra-typings": ["@commander-js/extra-typings@13.1.0", "", { "peerDependencies": { "commander": "~13.1.0" } }, "sha512-q5P52BYb1hwVWE6dtID7VvuJWrlfbCv4klj7BjUUOqMz4jbSZD4C9fJ9lRjL2jnBGTg+gDDlaXN51rkWcLk4fg=="],
 
-    "@ensdomains/unruggable-gateways": ["@ensdomains/unruggable-gateways@0.0.1", "", { "dependencies": { "@namestone/ezccip": "^0.1.0", "ethers": "^6.13.5", "fzstd": "^0.1.1" }, "peerDependencies": { "typescript": "^5.5.2" } }, "sha512-wX1YuhOTDN/c3KxeOPq5WzbZmgm4rL5R9bea7UmexiXsuDnJTqeWGSkA/sAxG+dgCB0EleuV+9Y24Z0/S608bg=="],
+    "@ensdomains/unruggable-gateways": ["@ensdomains/unruggable-gateways@0.0.2", "", { "dependencies": { "@namestone/ezccip": "^0.1.0", "ethers": "^6.13.5", "fzstd": "^0.1.1" }, "peerDependencies": { "typescript": "^5.5.2" } }, "sha512-5RDMYk3E8b3Iv3Rcmlvr9cNEjDZmc28pg8UQJ9WJwTFI9TtcikqhEEtTrHBkoA8nLNwQq0Nzbsdq3XhteJ4x8w=="],
 
     "@namestone/ezccip": ["@namestone/ezccip@0.1.0", "", { "dependencies": { "ethers": "^6.13.4" } }, "sha512-SQdpp8r/U0YL1w0zE6Ne8yVOBf0sV2Pw8HQXhsF7sKlMsgFbhq9d0crJ2H4l+N9ALIhvm340jQWlSCT8zRzAWg=="],
 
