@@ -14,13 +14,12 @@ import {
   type RollupCommitType,
   chainName,
   CHAINS,
+  flattenErrors,
 } from "@ensdomains/unruggable-gateways";
 import { styleText } from "node:util";
 import { createProviderPair, parseRpcOpts } from "./providers";
 import { serve } from "./serve";
 import { runSlotDataTests } from "./test";
-import { flattenErrors } from "./utils";
-
 function parseUint(s: string): number {
   const i = parseInt(s);
   if (!Number.isSafeInteger(i) || i < 0)
@@ -168,7 +167,7 @@ function serveGateway<R extends Rollup>(
             Date.now() - t0,
           );
         } catch (err) {
-          console.log(new Date(), `Prefetch failed: ${flattenErrors(err)}`);
+          console.log(new Date(), `Prefetch failed: ${flattenErrors(err, String)}`);
         }
         setTimeout(prefetch, gateway.latestCache.cacheMs);
       }
@@ -196,7 +195,7 @@ function serveGateway<R extends Rollup>(
       chain2: chainName(rollup.provider2._network.chainId),
       since: new Date(),
       prefetch: opts.cache && opts.prefetch,
-	  timeout: opts.timeout,
+      timeout: opts.timeout,
       ...gateway,
       ...rollup,
       beaconAPI: undefined, // hide
