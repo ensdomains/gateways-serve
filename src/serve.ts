@@ -2,9 +2,9 @@ import {
   Gateway,
   toUnpaddedHex,
   type Rollup,
+  flattenErrors,
 } from "@ensdomains/unruggable-gateways";
 import { Contract } from "ethers/contract";
-import { flattenErrors } from "./utils";
 
 const headers = { "access-control-allow-origin": "*" }; // TODO: cli-option to disable cors?
 
@@ -84,9 +84,11 @@ export const serve = <rollup extends Rollup>({
             );
             return Response.json({ data }, { headers });
           } catch (err) {
-            const error = flattenErrors(err);
-            console.log(new Date(), error);
-            return Response.json({ error }, { headers, status: 500 });
+            console.log(new Date(), flattenErrors(err, String));
+            return Response.json(
+              { message: flattenErrors(err) },
+              { headers, status: 500 },
+            );
           }
         }
         default: {
