@@ -34,7 +34,7 @@ export const serve = <rollup extends Rollup>({
         case "GET": {
           const url = new URL(req.url);
           if (url.pathname === "/") {
-            return Response.json(config);
+            return Response.json(config, { headers });
           } else if (url.pathname === "/head") {
             const commit = await gateway.getLatestCommit();
             const [timestamp, stateRoot] = await Promise.all([
@@ -48,9 +48,10 @@ export const serve = <rollup extends Rollup>({
                 timestamp,
                 stateRoot,
               }),
+              { headers },
             );
           } else {
-            return new Response("file not found", { status: 404 });
+            return new Response("file not found", { status: 404, headers });
           }
         }
         case "POST": {

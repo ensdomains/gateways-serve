@@ -22,13 +22,6 @@ import { createProviderPair, parseRpcOpts } from "./providers";
 import { serve } from "./serve";
 import { runSlotDataTests } from "./test";
 
-function parseUint(s: string): number {
-  const i = parseInt(s);
-  if (!Number.isSafeInteger(i) || i < 0)
-    throw new Error(`expected unsigned integer: ${s}`);
-  return i;
-}
-
 const program = new Command()
   .name("gateways-serve")
   .description("A CLI tool to serve gateways")
@@ -208,11 +201,15 @@ function serveGateway<R extends Rollup>(
   });
 }
 
+function parseUint(s: string): number {
+  const i = parseInt(s);
+  if (!Number.isSafeInteger(i) || i < 0)
+    throw new Error(`expected unsigned integer: ${s}`);
+  return i;
+}
+
 function chainDetails(chain: Chain) {
-  return {
-    chain,
-    name: chainName(chain),
-  };
+  return { chain, name: chainName(chain) };
 }
 
 const createBasicRollup = <rollup extends Rollup, config>(
