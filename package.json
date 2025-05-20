@@ -1,7 +1,7 @@
 {
   "name": "gateways-serve",
   "type": "module",
-  "version": "0.1.2",
+  "version": "0.0.3",
   "bin": {
     "gateways-serve": "./src/index.ts"
   },
@@ -16,11 +16,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@ensdomains/unruggable-gateways": "^0.0.2",
+    "@unruggable/gateways": "^1.2.2",
     "commander": "^13.1.0",
-    "ethers": "^6.13.5"
-  },
-  "trustedDependencies": [
-    "@unruggable/gateways"
-  ]
+    "ethers": "^6.13"
+  }
 }

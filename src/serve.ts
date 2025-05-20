@@ -3,7 +3,7 @@ import {
   toUnpaddedHex,
   type Rollup,
   flattenErrors,
-} from "@ensdomains/unruggable-gateways";
+} from "@unruggable/gateways";
 import { Contract } from "ethers/contract";
 
 const headers = { "access-control-allow-origin": "*" }; // TODO: cli-option to disable cors?
@@ -24,6 +24,7 @@ export const serve = <rollup extends Rollup>({
       switch (req.method) {
         case "OPTIONS": {
           return new Response(null, {
+            status: 204,
             headers: {
               ...headers,
               "access-control-allow-headers": "*",
@@ -31,40 +32,26 @@ export const serve = <rollup extends Rollup>({
           });
         }
         case "GET": {
-          const commit = await gateway.getLatestCommit();
-          const commits = [commit];
-          if (gateway instanceof Gateway) {
-            for (const p of await Promise.allSettled(
-              Array.from(gateway.commitCacheMap.cachedKeys(), (i) =>
-                gateway.commitCacheMap.cachedValue(i),
-              ),
-            )) {
-              if (
-                p.status === "fulfilled" &&
-                p.value &&
-                p.value.commit !== commit
-              ) {
-                commits.push(p.value.commit);
-              }
-            }
+          const url = new URL(req.url);
+          if (url.pathname === "/") {
+            return Response.json(config);
+          } else if (url.pathname === "/head") {
+            const commit = await gateway.getLatestCommit();
+            const [timestamp, stateRoot] = await Promise.all([
+              commit.prover.fetchTimestamp(),
+              commit.prover.fetchStateRoot(),
+            ]);
+            return Response.json(
+              toJSON({
+                commitIndex: commit.index,
+                prover: commit.prover.context,
+                timestamp,
+                stateRoot,
+              }),
+            );
+          } else {
+            return new Response("file not found", { status: 404 });
           }
-          return Response.json({
-            ...config,
-            prover: toJSON({
-              ...commit.prover,
-              block: undefined, // hide
-              batchIndex: undefined, // hide
-              cache: {
-                fetches: commit.prover.cache.maxCached,
-                proofs: commit.prover.proofLRU.max,
-              },
-            }),
-            commits: commits.map((c) => ({
-              ...toJSON(c),
-              fetches: c.prover.cache.cachedSize,
-              proofs: c.prover.proofLRU.size,
-            })),
-          });
         }
         case "POST": {
           const t0 = performance.now();
@@ -87,7 +74,7 @@ export const serve = <rollup extends Rollup>({
             console.log(new Date(), flattenErrors(err, String));
             return Response.json(
               { message: flattenErrors(err) },
-              { headers, status: 500 },
+              { status: 500 },
             );
           }
         }
@@ -117,6 +104,13 @@ function toJSON(x: object) {
         case "boolean":
         case "number":
           info[k] = v;
+          break;
+        case "object":
+          if (Array.isArray(v)) {
+            info[k] = v.map(toJSON);
+          } else if (v && v.constructor === Object) {
+            info[k] = toJSON(v);
+          }
           break;
       }
     }

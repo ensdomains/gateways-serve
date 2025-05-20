@@ -4,7 +4,7 @@
     "": {
       "name": "gateways-serve",
       "dependencies": {
-        "@ensdomains/unruggable-gateways": "^0.0.2",
+        "@unruggable/gateways": "^1.2.2",
         "commander": "^13.1.0",
         "ethers": "^6.13.5",
       },
@@ -17,12 +17,13 @@
       },
     },
   },
+  "trustedDependencies": [
+    "@unruggable/gateways",
+  ],
   "packages": {
     "@adraffy/ens-normalize": ["@adraffy/ens-normalize@1.10.1", "", {}, "sha512-96Z2IP3mYmF1Xg2cDm8f1gWGf/HUVedQ3FMifV4kG/PQ4yEP51xDtRAEfhVNt5f/uzpNkZHwWQuUcu6D6K+Ekw=="],
 
     "@commander-js/extra-typings": ["@commander-js/extra-typings@13.1.0", "", { "peerDependencies": { "commander": "~13.1.0" } }, "sha512-q5P52BYb1hwVWE6dtID7VvuJWrlfbCv4klj7BjUUOqMz4jbSZD4C9fJ9lRjL2jnBGTg+gDDlaXN51rkWcLk4fg=="],
-
-    "@ensdomains/unruggable-gateways": ["@ensdomains/unruggable-gateways@0.0.2", "", { "dependencies": { "@namestone/ezccip": "^0.1.0", "ethers": "^6.13.5", "fzstd": "^0.1.1" }, "peerDependencies": { "typescript": "^5.5.2" } }, "sha512-5RDMYk3E8b3Iv3Rcmlvr9cNEjDZmc28pg8UQJ9WJwTFI9TtcikqhEEtTrHBkoA8nLNwQq0Nzbsdq3XhteJ4x8w=="],
 
     "@namestone/ezccip": ["@namestone/ezccip@0.1.0", "", { "dependencies": { "ethers": "^6.13.4" } }, "sha512-SQdpp8r/U0YL1w0zE6Ne8yVOBf0sV2Pw8HQXhsF7sKlMsgFbhq9d0crJ2H4l+N9ALIhvm340jQWlSCT8zRzAWg=="],
 
@@ -35,6 +36,8 @@
     "@types/node": ["@types/node@22.7.5", "", { "dependencies": { "undici-types": "~6.19.2" } }, "sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ=="],
 
     "@types/ws": ["@types/ws@8.5.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw=="],
+
+    "@unruggable/gateways": ["@unruggable/gateways@1.2.2", "", { "dependencies": { "@namestone/ezccip": "^0.1.0", "ethers": "^6.13", "fzstd": "^0.1.1" }, "peerDependencies": { "typescript": "^5.5.2" } }, "sha512-mKzYh9UepK0h1gnmwZ1dhNqkwX7maq1dUGMvtn98Itvo0grj1yR8uJk0bEt5VrRMRqSTErfPRiOxsnIvWm8VuA=="],
 
     "aes-js": ["aes-js@4.0.0-beta.5", "", {}, "sha512-G965FqalsNyrPqgEGON7nIx1e/OVENSgiEIzyC63haUMuvNnwIgIjMs52hlTCKhkBny7A2ORNlfY9Zu+jmGk1Q=="],
 
