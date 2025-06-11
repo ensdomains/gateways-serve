@@ -34,49 +34,41 @@ export const serve = <rollup extends Rollup>({
         case "GET": {
           const url = new URL(req.url);
           if (url.pathname === "/") {
-            return Response.json(config, { headers });
+            return info();
           } else if (url.pathname === "/head") {
-            const commit = await gateway.getLatestCommit();
-            const [timestamp, stateRoot] = await Promise.all([
-              commit.prover.fetchTimestamp(),
-              commit.prover.fetchStateRoot(),
-            ]);
-            return Response.json(
-              toJSON({
-                commitIndex: commit.index,
-                prover: commit.prover.context,
-                timestamp,
-                stateRoot,
-              }),
-              { headers },
-            );
+            return await head();
           } else {
             return new Response("file not found", { status: 404, headers });
           }
         }
         case "POST": {
-          const t0 = performance.now();
-          try {
-            const { sender, data: calldata } = await req.json();
-            const { data, history } = await gateway.handleRead(
-              sender,
-              calldata,
-              {
-                protocol: "raw",
-              },
-            );
-            console.log(
-              new Date(),
-              history.toString(),
-              Math.round(performance.now() - t0),
-            );
-            return Response.json({ data }, { headers });
-          } catch (err) {
-            console.log(new Date(), flattenErrors(err, String));
-            return Response.json(
-              { message: flattenErrors(err) },
-              { status: 500 },
-            );
+          const url = new URL(req.url);
+          if (url.searchParams.has("info")) {
+            return info();
+          } else if (url.searchParams.has("head")) {
+            return await head();
+          } else {
+            const t0 = performance.now();
+            try {
+              const { sender, data: calldata } = await req.json();
+              const { data, history } = await gateway.handleRead(
+                sender,
+                calldata,
+                { protocol: "raw" },
+              );
+              console.log(
+                new Date(),
+                history.toString(),
+                Math.round(performance.now() - t0),
+              );
+              return Response.json({ data }, { headers });
+            } catch (err) {
+              console.log(new Date(), flattenErrors(err, String));
+              return Response.json(
+                { message: flattenErrors(err) },
+                { status: 500 },
+              );
+            }
           }
         }
         default: {
@@ -88,6 +80,25 @@ export const serve = <rollup extends Rollup>({
   console.log(`Rollup: ${gateway.rollup.constructor.name}`);
   console.log(`Listening on ${port}`);
   return server;
+  function info() {
+    return Response.json(config, { headers });
+  }
+  async function head() {
+    const commit = await gateway.getLatestCommit();
+    const [timestamp, stateRoot] = await Promise.all([
+      commit.prover.fetchTimestamp(),
+      commit.prover.fetchStateRoot(),
+    ]);
+    return Response.json(
+      toJSON({
+        commitIndex: commit.index,
+        prover: commit.prover.context,
+        timestamp,
+        stateRoot,
+      }),
+      { headers },
+    );
+  }
 };
 
 function toJSON(x: object) {
