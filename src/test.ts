@@ -105,7 +105,7 @@ const verifierConfigs = {
     pointer: "0xA2e3c1b0a43336A21E2fA56928bc7B7848c156A8",
   },
   scroll: {
-    verifier: "0xc8d16f56ac528d9e0e67ecb6ece1e95cc8987968",
+    verifier: "0xe439F14Aaf43c87e3dfBDB0A470D9EB2C7f27d93",
     target: "0x09D2233D3d109683ea95Da4546e7E9Fc17a6dfAF",
     pointer: "0x28507d851729c12F193019c7b05D916D53e9Cf57",
   },
