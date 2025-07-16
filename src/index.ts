@@ -6,6 +6,7 @@ import {
   LineaRollup,
   OPFaultRollup,
   type ArbitrumConfig,
+  type Chain,
   type EuclidConfig,
   type OPFaultConfig,
   type ProviderPair,
@@ -15,17 +16,11 @@ import {
   chainName,
   CHAINS,
   flattenErrors,
-} from "@ensdomains/unruggable-gateways";
+} from "@unruggable/gateways";
 import { styleText } from "node:util";
 import { createProviderPair, parseRpcOpts } from "./providers";
 import { serve } from "./serve";
 import { runSlotDataTests } from "./test";
-function parseUint(s: string): number {
-  const i = parseInt(s);
-  if (!Number.isSafeInteger(i) || i < 0)
-    throw new Error(`expected unsigned integer: ${s}`);
-  return i;
-}
 
 const program = new Command()
   .name("gateways-serve")
@@ -59,7 +54,7 @@ const program = new Command()
     "--commit-depth <number>",
     "Number of older commits to keep",
     parseUint,
-    2,
+    1,
   )
   .option(
     "--timeout <number>",
@@ -155,8 +150,8 @@ function serveGateway<R extends Rollup>(
       opts.frequency * 1000,
     );
     if (opts.prefetch) {
-      prefetch();
-      async function prefetch() {
+      fire();
+      async function fire() {
         try {
           const t0 = Date.now();
           const commit = await gateway.getLatestCommit();
@@ -167,9 +162,12 @@ function serveGateway<R extends Rollup>(
             Date.now() - t0,
           );
         } catch (err) {
-          console.log(new Date(), `Prefetch failed: ${flattenErrors(err, String)}`);
+          console.log(
+            new Date(),
+            `Prefetch failed: ${flattenErrors(err, String)}`,
+          );
         }
-        setTimeout(prefetch, gateway.latestCache.cacheMs);
+        setTimeout(fire, gateway.latestCache.cacheMs);
       }
     }
   } else {
@@ -191,8 +189,8 @@ function serveGateway<R extends Rollup>(
     gateway,
     config: {
       name: rollup.constructor.name,
-      chain1: chainName(rollup.provider1._network.chainId),
-      chain2: chainName(rollup.provider2._network.chainId),
+      chain1: chainDetails(rollup.provider1._network.chainId),
+      chain2: chainDetails(rollup.provider2._network.chainId),
       since: new Date(),
       prefetch: opts.cache && opts.prefetch,
       timeout: opts.timeout,
@@ -201,6 +199,17 @@ function serveGateway<R extends Rollup>(
       beaconAPI: undefined, // hide
     },
   });
+}
+
+function parseUint(s: string): number {
+  const i = parseInt(s);
+  if (!Number.isSafeInteger(i) || i < 0)
+    throw new Error(`expected unsigned integer: ${s}`);
+  return i;
+}
+
+function chainDetails(chain: Chain) {
+  return { chain, name: chainName(chain) };
 }
 
 const createBasicRollup = <rollup extends Rollup, config>(
