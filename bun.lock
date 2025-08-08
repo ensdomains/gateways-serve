@@ -4,7 +4,7 @@
     "": {
       "name": "gateways-serve",
       "dependencies": {
-        "@unruggable/gateways": "^1.2.2",
+        "@unruggable/gateways": "^1.2.5",
         "commander": "^13.1.0",
         "ethers": "^6.13",
       },
@@ -34,7 +34,7 @@
 
     "@types/ws": ["@types/ws@8.5.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw=="],
 
-    "@unruggable/gateways": ["@unruggable/gateways@1.2.2", "", { "dependencies": { "@namestone/ezccip": "^0.1.0", "ethers": "^6.13", "fzstd": "^0.1.1" }, "peerDependencies": { "typescript": "^5.5.2" } }, "sha512-mKzYh9UepK0h1gnmwZ1dhNqkwX7maq1dUGMvtn98Itvo0grj1yR8uJk0bEt5VrRMRqSTErfPRiOxsnIvWm8VuA=="],
+    "@unruggable/gateways": ["@unruggable/gateways@1.2.5", "", { "dependencies": { "@namestone/ezccip": "^0.1.0", "ethers": "^6.13", "fzstd": "^0.1.1" }, "peerDependencies": { "typescript": "^5.5.2" } }, "sha512-U80POq7FZ9BtKpmjd+TtIlktl5qDC0k3z9No+PiGQqtNfUMIx4i3+m2OSL6TAlY/rPi8VNvpl7ogK4Hn96bmpg=="],
 
     "aes-js": ["aes-js@4.0.0-beta.5", "", {}, "sha512-G965FqalsNyrPqgEGON7nIx1e/OVENSgiEIzyC63haUMuvNnwIgIjMs52hlTCKhkBny7A2ORNlfY9Zu+jmGk1Q=="],
 
