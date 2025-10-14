@@ -375,7 +375,7 @@ function decideProvider(chain: Chain, rpcOpts: RpcOpts) {
     return {
       info,
       type: "drpc",
-      url: `https://lb.drpc.org/ogrpc?network=${info.drpc}&dkey=${apiKey}`,
+      url: `https://lb.drpc.live/${info.drpc}/${apiKey}`,
       apiKey,
     };
   }

@@ -11,9 +11,10 @@ if [[ "$CHAIN" == "scroll-sepolia" || "$CHAIN" == "scroll" ]]; then
   if [[ "$CHAIN" == *"-"* ]]; then
     SUFFIX="-${CHAIN#*-}"
   fi
-  echo "BEACON_URL=https://lb.drpc.org/rest/$DRPC_KEY/eth-beacon-chain$SUFFIX" >> $GITHUB_ENV
+  echo "BEACON_URL=https://lb.drpc.live/rest/$DRPC_KEY/eth-beacon-chain$SUFFIX" >> $GITHUB_ENV
 fi
 
 if [[ "$CHAIN" == "linea-sepolia" || "$CHAIN" == "linea" ]]; then
   echo "INFURA_KEY=$INFURA_KEY" >> $GITHUB_ENV
 fi
+
