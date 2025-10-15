@@ -300,7 +300,7 @@ const createScrollRollup = (
           );
           process.exit(1);
         }
-        beaconUrl = `https://lb.drpc.org/rest/${drpcKey}/${slug}`;
+        beaconUrl = `https://lb.drpc.live/rest/${drpcKey}/${slug}`;
         console.log(`Derived Beacon API: ${beaconUrl}`);
       }
       const providers = createProviderPair(baseConfig, opts);
