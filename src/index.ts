@@ -21,11 +21,17 @@ import { styleText } from "node:util";
 import { createProviderPair, parseRpcOpts } from "./providers";
 import { serve } from "./serve";
 import { runSlotDataTests } from "./test";
+//import { version } from '../package.json' with { type: "json" };
+import { readFileSync } from "node:fs";
+
+const { version } = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+);
 
 const program = new Command()
   .name("gateways-serve")
   .description("A CLI tool to serve gateways")
-  .version("1.0.0")
+  .version(version)
   .option("-p, --port <number>", "Port to listen on", parseUint, 8000)
   .option("-t, --block-tag <string>", "Block tag to use", "finalized")
   .option("--calls", "Print RPC calls")
@@ -249,6 +255,7 @@ const createBoLDRollup = (
 const createOpFaultRollup = (
   name: string,
   baseConfig: RollupDeployment<OPFaultConfig>,
+  gameTypes = [],
 ) =>
   program
     .command(name)
@@ -257,6 +264,12 @@ const createOpFaultRollup = (
       "Minimum age of block in seconds (0 for finalized)",
       parseInt,
       21600,
+    )
+    .option(
+      "--game-types <string>",
+      ",-separated list of accepted GameTypes",
+      (s) => s.split(",").map((x) => BigInt(x)),
+      gameTypes,
     )
     .option("--game-finder <string>", "Game finder contract address")
     .action(function () {
@@ -267,6 +280,7 @@ const createOpFaultRollup = (
       } satisfies RollupDeployment<OPFaultConfig>;
       const providers = createProviderPair(config, opts);
       const rollup = new OPFaultRollup(providers, config, opts.minAgeSec);
+      rollup.gameTypes = opts.gameTypes;
       serveGateway(rollup, opts);
     });
 
@@ -315,6 +329,8 @@ createOpFaultRollup("op", OPFaultRollup.mainnetConfig);
 createOpFaultRollup("op-sepolia", OPFaultRollup.sepoliaConfig);
 createOpFaultRollup("base", OPFaultRollup.baseMainnetConfig);
 createOpFaultRollup("base-sepolia", OPFaultRollup.baseSepoliaConfig);
+createOpFaultRollup("celo", OPFaultRollup.celoMainnetConfig);
+createOpFaultRollup("celo-sepolia", OPFaultRollup.celoSepoliaConfig);
 
 createBasicRollup("linea", LineaRollup, LineaRollup.mainnetConfig);
 createBasicRollup("linea-sepolia", LineaRollup, LineaRollup.sepoliaConfig);

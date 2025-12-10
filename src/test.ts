@@ -4,13 +4,6 @@ import { createProvider, type RpcOpts } from "./providers";
 
 const opts = { enableCcipRead: true };
 
-type VerifierConfig = {
-  verifier: string;
-  pointer: string;
-  target: string;
-  urls: string[];
-};
-
 let errors = 0;
 
 const test = async (name: string, fn: () => Promise<boolean>) => {
@@ -33,7 +26,7 @@ const test = async (name: string, fn: () => Promise<boolean>) => {
         console.error(error);
       }
       process.stdout.write(
-        `\r${r ? "\x1b[32m✓\x1b[0m" : "\x1b[31m✗\x1b[0m"} ${name}\n`
+        `\r${r ? "\x1b[32m✓\x1b[0m" : "\x1b[31m✗\x1b[0m"} ${name}\n`,
       );
       return r;
     });
@@ -109,6 +102,16 @@ const verifierConfigs = {
     target: "0x09D2233D3d109683ea95Da4546e7E9Fc17a6dfAF",
     pointer: "0x28507d851729c12F193019c7b05D916D53e9Cf57",
   },
+  celo: {
+    verifier: "0x5bBE9A6F51E6Cc8e5BF6fB30aECC706A6242C83A",
+    target: "0xa969922E98dB2C94dE11717eF3eBc7B7A9008e22",
+    pointer: "0xaD85E1DcfF8adA5420EcB5095D3CCd9bC2e26404",
+  },
+  "celo-sepolia": {
+    verifier: "0x045ed722Af2A83C5Eff8b0Dd7BdD105a3C03AC80",
+    target: "0x0d3e01829E8364DeC0e7475ca06B5c73dbA33ef6",
+    pointer: "0x57C2F437E0a5E155ced91a7A17bfc372C0aF7B05",
+  },
 };
 
 export async function runSlotDataTests({
@@ -134,7 +137,7 @@ export async function runSlotDataTests({
   const contract = new Contract(
     slotDataReaderAddress,
     slotDataReaderAbi,
-    provider
+    provider,
   );
 
   const verifierConfigObj =

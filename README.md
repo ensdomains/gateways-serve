@@ -55,6 +55,8 @@ Currently supported chains are:
 - op-sepolia
 - base
 - base-sepolia
+- celo
+- celo-sepolia
 - linea
 - linea-sepolia
 - scroll
