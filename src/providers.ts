@@ -45,7 +45,7 @@ export const RPC_INFO = new Map<Chain, RPCInfo>(
     [
       {
         chain: CHAINS.MAINNET,
-        rpc: "https://rpc.ankr.com/eth/", // https://cloudflare-eth.com is too rate limited
+        rpc: "https://eth.llamarpc.com",
         ankr: "eth",
         infura: "mainnet",
         alchemy: "eth-mainnet",
@@ -53,7 +53,7 @@ export const RPC_INFO = new Map<Chain, RPCInfo>(
       },
       {
         chain: CHAINS.SEPOLIA,
-        rpc: "https://rpc.ankr.com/eth_sepolia/",
+        rpc: "https://sepolia.drpc.org",
         ankr: "eth_sepolia",
         infura: "sepolia",
         alchemy: "eth-sepolia",
@@ -61,7 +61,7 @@ export const RPC_INFO = new Map<Chain, RPCInfo>(
       },
       {
         chain: CHAINS.HOLESKY,
-        rpc: "https://rpc.ankr.com/eth_holesky/", //'https://rpc.holesky.ethpandaops.io',
+        rpc: "https://holesky.drpc.org",
         ankr: "eth_holesky",
         infura: "holesky",
         alchemy: "eth-holesky",
@@ -280,10 +280,16 @@ export const RPC_INFO = new Map<Chain, RPCInfo>(
         infura: "opbnb-mainnet",
       },
       {
-        // https://docs.celo.org/network#celo-alfajores
-        chain: CHAINS.CELO_ALFAJORES,
-        rpc: "https://alfajores-forno.celo-testnet.org",
-        //infura: 'celo-alfajores', // 20241002: eth_getProof doesn't work
+        // https://docs.celo.org/tooling/overview/network-overview#celo-mainnet
+        chain: CHAINS.CELO,
+        rpc: "https://forno.celo.org",
+        drpc: "celo",
+      },
+      {
+        // https://docs.celo.org/tooling/overview/network-overview#celo-sepolia-testnet
+        chain: CHAINS.CELO_SEPOLIA,
+        rpc: "https://forno.celo-sepolia.celo-testnet.org",
+        drpc: "celo-sepolia",
       },
       {
         // https://docs.worldcoin.org/world-chain/quick-start/info
@@ -410,7 +416,7 @@ export function parseRpcOpts(rpcOpts: InputRpcOpts, pairIndex: 1 | 2): RpcOpts {
     alchemyPremium: rpcOpts["rpc.alchemyPremium"],
     ankrKey: rpcOpts["rpc.ankrKey"],
     customRpc: rpcOpts[`rpc.chain${pairIndex}`],
-	timeout: rpcOpts.timeout
+    timeout: rpcOpts.timeout,
   };
 }
 export function createProviderPair(
